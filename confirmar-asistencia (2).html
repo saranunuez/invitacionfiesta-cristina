@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Confirmar Asistencia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Lato:wght@300;400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --gold: #c9a84c;
+      --gold-light: #e8c97a;
+      --cream: #fdf6e3;
+      --dark: #1a1208;
+      --brown: #3d2b1f;
+      --shadow: rgba(26,18,8,0.18);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      min-height: 100vh;
+      background: var(--cream);
+      font-family: 'Lato', sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 10% 20%, rgba(201,168,76,0.13) 0%, transparent 55%),
+        radial-gradient(ellipse at 90% 80%, rgba(201,168,76,0.10) 0%, transparent 55%);
+      pointer-events: none;
+    }
+    .corner { position: fixed; width: 120px; height: 120px; opacity: 0.18; }
+    .corner svg { width: 100%; height: 100%; }
+    .corner.tl { top: 12px; left: 12px; }
+    .corner.tr { top: 12px; right: 12px; transform: scaleX(-1); }
+    .corner.bl { bottom: 12px; left: 12px; transform: scaleY(-1); }
+    .corner.br { bottom: 12px; right: 12px; transform: scale(-1,-1); }
+    .card {
+      background: #fff;
+      border: 1.5px solid var(--gold);
+      border-radius: 4px;
+      max-width: 480px;
+      width: 100%;
+      padding: 52px 44px 44px;
+      box-shadow: 0 8px 48px var(--shadow), 0 2px 8px rgba(201,168,76,0.12);
+      position: relative;
+      animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) both;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(32px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 10%; right: 10%;
+      height: 3px;
+      background: linear-gradient(90deg, transparent, var(--gold), transparent);
+      border-radius: 2px;
+    }
+    .ornament { text-align: center; color: var(--gold); font-size: 22px; letter-spacing: 8px; margin-bottom: 10px; opacity: 0.7; }
+    h1 { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 900; color: var(--dark); text-align: center; line-height: 1.15; margin-bottom: 6px; }
+    .subtitle { text-align: center; font-size: 0.92rem; color: var(--brown); letter-spacing: 0.06em; margin-bottom: 32px; font-weight: 300; }
+    .divider { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+    .divider::after { background: linear-gradient(90deg, var(--gold), transparent); }
+    .divider span { color: var(--gold); font-size: 14px; }
+    .field { margin-bottom: 18px; }
+    label { display: block; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brown); margin-bottom: 8px; }
+    input[type="text"], select {
+      width: 100%;
+      padding: 13px 16px;
+      border: 1.5px solid #e0d5bc;
+      border-radius: 3px;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.97rem;
+      color: var(--dark);
+      background: #fdf9f0;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+      appearance: none;
+    }
+    input[type="text"]:focus, select:focus {
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(201,168,76,0.13);
+      background: #fff;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a84c' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      cursor: pointer;
+    }
+
+    /* Sección invitado extra */
+    .extra-section {
+      display: none;
+      background: #fdf9f0;
+      border: 1px dashed var(--gold);
+      border-radius: 4px;
+      padding: 18px 16px 8px;
+      margin-bottom: 18px;
+      animation: fadeUp 0.4s ease both;
+    }
+    .extra-section.visible { display: block; }
+    .extra-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .btn {
+      width: 100%;
+      margin-top: 28px;
+      padding: 15px;
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-light) 50%, var(--gold) 100%);
+      background-size: 200% 200%;
+      border: none;
+      border-radius: 3px;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--dark);
+      cursor: pointer;
+      transition: background-position 0.4s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 18px rgba(201,168,76,0.3);
+    }
+    .btn:hover { background-position: right center; transform: translateY(-2px); box-shadow: 0 8px 28px rgba(201,168,76,0.38); }
+    .btn:active { transform: translateY(0); }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .btn .spinner { display: none; width: 18px; height: 18px; border: 2px solid rgba(26,18,8,0.2); border-top-color: var(--dark); border-radius: 50%; animation: spin 0.7s linear infinite; margin: 0 auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .btn.loading .btn-text { display: none; }
+    .btn.loading .spinner { display: block; }
+
+    .success { display: none; text-align: center; padding: 28px 0 8px; animation: fadeUp 0.5s ease both; }
+    .success .check { font-size: 3rem; margin-bottom: 12px; }
+    .success h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; color: var(--dark); margin-bottom: 8px; }
+    .success p { color: var(--brown); font-size: 0.92rem; font-weight: 300; }
+    .error-msg { display: none; background: #fff3f3; border: 1px solid #f5c6c6; border-radius: 3px; padding: 12px 16px; font-size: 0.85rem; color: #b94a4a; margin-top: 14px; text-align: center; }
+
+    @media (max-width: 520px) {
+      .card { padding: 40px 24px 36px; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="corner tl"><svg viewBox="0 0 100 100" fill="none"><path d="M5 95 L5 5 L95 5" stroke="#c9a84c" stroke-width="3"/><path d="M15 95 L15 15 L95 15" stroke="#c9a84c" stroke-width="1"/><circle cx="5" cy="5" r="4" fill="#c9a84c"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 100 100" fill="none"><path d="M5 95 L5 5 L95 5" stroke="#c9a84c" stroke-width="3"/><path d="M15 95 L15 15 L95 15" stroke="#c9a84c" stroke-width="1"/><circle cx="5" cy="5" r="4" fill="#c9a84c"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 100 100" fill="none"><path d="M5 95 L5 5 L95 5" stroke="#c9a84c" stroke-width="3"/><path d="M15 95 L15 15 L95 15" stroke="#c9a84c" stroke-width="1"/><circle cx="5" cy="5" r="4" fill="#c9a84c"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 100 100" fill="none"><path d="M5 95 L5 5 L95 5" stroke="#c9a84c" stroke-width="3"/><path d="M15 95 L15 15 L95 15" stroke="#c9a84c" stroke-width="1"/><circle cx="5" cy="5" r="4" fill="#c9a84c"/></svg></div>
+
+  <div class="card">
+    <div id="form-section">
+      <div class="ornament">✦ ✦ ✦</div>
+      <h1>Confirma tu<br/>Asistencia</h1>
+      <p class="subtitle">Nos alegra contar contigo</p>
+      <div class="divider"><span>✦</span></div>
+
+      <!-- Invitado principal -->
+      <div class="field">
+        <label>Tu nombre completo</label>
+        <input type="text" id="nombre" placeholder="Tu nombre y apellido" autocomplete="name"/>
+      </div>
+
+      <div class="field">
+        <label>¿Llevarás un acompañante?</label>
+        <select id="tiene-extra" onchange="toggleExtra()">
+          <option value="">— Selecciona una opción —</option>
+          <option value="si">✓ Sí, llevaré un acompañante</option>
+          <option value="no">✗ No, asistiré solo/a</option>
+        </select>
+      </div>
+
+      <!-- Invitado extra -->
+      <div class="extra-section" id="extra-section">
+        <div class="extra-label">✦ Datos del acompañante ✦</div>
+        <div class="field">
+          <label>Nombre del acompañante</label>
+          <input type="text" id="nombre-extra" placeholder="Nombre y apellido"/>
+        </div>
+      </div>
+
+      <button class="btn" id="btn-confirmar" onclick="confirmarAsistencia()">
+        <span class="btn-text">Confirmar Asistencia</span>
+        <div class="spinner"></div>
+      </button>
+
+      <div class="error-msg" id="error-msg">
+        Hubo un error al enviar. Verifica tu conexión e intenta de nuevo.
+      </div>
+    </div>
+
+    <div class="success" id="success-section">
+      <div class="check">🥂</div>
+      <h2>¡Confirmado!</h2>
+      <p id="success-msg">Gracias por confirmar tu asistencia.<br/>¡Te esperamos con gusto!</p>
+    </div>
+  </div>
+
+  <script>
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwa-y1w11l1JXryTgSwYDB84fJh78AztxI2HY3aYVxg63s_M6J1IPhL5aAW2WwG-0MiEg/exec";
+
+    function toggleExtra() {
+      const val = document.getElementById('tiene-extra').value;
+      const sec = document.getElementById('extra-section');
+      if (val === 'si') {
+        sec.classList.add('visible');
+      } else {
+        sec.classList.remove('visible');
+        document.getElementById('nombre-extra').value = '';
+      }
+    }
+
+    function confirmarAsistencia() {
+      const nombre      = document.getElementById('nombre').value.trim();
+      const tieneExtra  = document.getElementById('tiene-extra').value;
+      const nombreExtra = document.getElementById('nombre-extra').value.trim();
+
+      // Validaciones
+      if (!nombre) {
+        document.getElementById('nombre').style.borderColor = '#e07070';
+        document.getElementById('nombre').focus();
+        return;
+      }
+      if (!tieneExtra) {
+        document.getElementById('tiene-extra').style.borderColor = '#e07070';
+        return;
+      }
+      if (tieneExtra === 'si' && !nombreExtra) {
+        document.getElementById('nombre-extra').style.borderColor = '#e07070';
+        document.getElementById('nombre-extra').focus();
+        return;
+      }
+
+      const btn = document.getElementById('btn-confirmar');
+      btn.classList.add('loading');
+      btn.disabled = true;
+      document.getElementById('error-msg').style.display = 'none';
+
+      const fecha = new Date().toLocaleString('es-MX', { timeZone: 'America/Cancun' });
+      const acompanante = tieneExtra === 'si' ? nombreExtra : 'No lleva acompañante';
+      const total = tieneExtra === 'si' ? '2' : '1';
+
+      // Enviar via iframe oculto
+      const iframeId = 'iframe-' + Date.now();
+      const iframe = document.createElement('iframe');
+      iframe.name = iframeId;
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+
+      const hiddenForm = document.createElement('form');
+      hiddenForm.method = 'POST';
+      hiddenForm.action = GOOGLE_SCRIPT_URL;
+      hiddenForm.target = iframeId;
+
+      const fields = { nombre, acompanante, total, fecha };
+      for (const key in fields) {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = fields[key];
+        hiddenForm.appendChild(input);
+      }
+      document.body.appendChild(hiddenForm);
+
+      iframe.onload = function() {
+        document.getElementById('form-section').style.display = 'none';
+        const s = document.getElementById('success-section');
+        s.style.display = 'block';
+        const extra = tieneExtra === 'si'
+          ? ` junto con <strong>${nombreExtra}</strong>`
+          : '';
+        document.getElementById('success-msg').innerHTML =
+          `¡Gracias, <strong>${nombre}</strong>${extra}!<br/>¡Los esperamos con mucho gusto! 🎉`;
+        hiddenForm.remove();
+      };
+
+      hiddenForm.submit();
+    }
+
+    // Limpiar bordes rojos al escribir
+    ['nombre','nombre-extra','tiene-extra'].forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.addEventListener('input', function() { this.style.borderColor = ''; });
+      if (el) el.addEventListener('change', function() { this.style.borderColor = ''; });
+    });
+  </script>
+</body>
+</html>
